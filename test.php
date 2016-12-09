@@ -12,14 +12,7 @@ if(!defined('e107_INIT'))
 
 e107_require_once(e_PLUGIN . 'batch/includes/batch.php');
 
-$db = e107::getDb();
-$db->select('comments', '*', 'comment_id > 0');
-
-$comments = array();
-while($comment = $db->fetch())
-{
-	$comments[] = $comment;
-}
+$comments = get_comments();
 
 $batch = array(
 	'operations'       => array(
@@ -36,3 +29,23 @@ $batch = array(
 
 batch_set($batch);
 batch_process(e_HTTP);
+
+
+/**
+ * Helper function to load comments for Batch process (as dummy data).
+ *
+ * @return array
+ */
+function get_comments()
+{
+	$db = e107::getDb();
+	$db->select('comments', '*', 'comment_id > 0');
+
+	$comments = array();
+	while($comment = $db->fetch())
+	{
+		$comments[] = $comment;
+	}
+
+	return $comments;
+}
