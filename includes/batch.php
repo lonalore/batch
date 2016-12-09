@@ -319,7 +319,7 @@ function _batch_populate_queue(&$batch, $set_id)
 	{
 		$batch_set += array(
 			'queue' => array(
-				'name'  => 'drupal_batch:' . $batch['id'] . ':' . $set_id,
+				'name'  => 'e107_batch:' . $batch['id'] . ':' . $set_id,
 				'class' => $batch['progressive'] ? 'BatchQueue' : 'BatchMemoryQueue',
 			),
 		);
@@ -450,11 +450,6 @@ function _batch_page()
 			_batch_do();
 			break;
 
-		case 'do_nojs':
-			// Non-JavaScript-based progress page.
-			$output = _batch_progress_page_nojs();
-			break;
-
 		case 'finished':
 			_batch_finished();
 			break;
@@ -465,21 +460,10 @@ function _batch_page()
 
 /**
  * Initializes the batch processing.
- *
- * JavaScript-enabled clients are identified by the 'has_js' cookie set in
- * drupal.js. If no JavaScript-enabled page has been visited during the current
- * user's browser session, the non-JavaScript version is returned.
  */
 function _batch_start()
 {
-	if(isset($_COOKIE['has_js']) && $_COOKIE['has_js'])
-	{
-		return _batch_progress_page_js();
-	}
-	else
-	{
-		return _batch_progress_page_nojs();
-	}
+	return _batch_progress_page_js();
 }
 
 /**
@@ -548,73 +532,6 @@ function _batch_do()
 }
 
 /**
- * Outputs a batch processing page without JavaScript support.
- *
- * @see _batch_process()
- */
-function _batch_progress_page_nojs()
-{
-	$batch = &batch_get();
-
-	$current_set = _batch_current_set();
-	$caption = $current_set['title'];
-
-	$new_op = 'do_nojs';
-
-	if(!isset($batch['running']))
-	{
-		// This is the first page so we return some output immediately.
-		$percentage = 0;
-		$message = $current_set['init_message'];
-		$batch['running'] = true;
-	}
-	else
-	{
-		// This is one of the later requests; do some processing first.
-
-		// Error handling: if PHP dies due to a fatal error (e.g. a nonexistent
-		// function), it will output whatever is in the output buffer, followed by
-		// the error message.
-		ob_start();
-		$fallback = $current_set['error_message'] . '<br />' . $batch['error_message'];
-		print $fallback;
-
-		// Perform actual processing.
-		list($percentage, $message) = _batch_process($batch);
-
-		if($percentage == 100)
-		{
-			$new_op = 'finished';
-		}
-
-		// PHP did not die; remove the fallback output.
-		ob_end_clean();
-	}
-
-	// Merge required query parameters for batch processing into those provided by
-	// batch_set() or hook_batch_alter().
-	$batch['url_options']['query']['id'] = $batch['id'];
-	$batch['url_options']['query']['op'] = $new_op;
-
-	$url = e107::url('batch', 'batch', array(), $batch['url_options']);
-
-	e107::meta(null, '0; URL=' . $url, array(
-		'http-equiv' => 'Refresh',
-	));
-
-	$output = '<div id="progress" class="progress">';
-	$output .= '<div class="bar"><div class="filled" style="width: ' . $percentage . '%"></div></div>';
-	$output .= '<div class="percentage">' . $percentage . '%</div>';
-	$output .= '<div class="message">' . $message . '</div>';
-	$output .= '</div>';
-
-	require_once(HEADERF);
-	e107::getRender()->tablerender($caption, $output);
-	require_once(FOOTERF);
-	exit();
-}
-
-/**
  * Starts the timer with the specified name.
  *
  * If you start and stop the same timer multiple times, the measured
@@ -676,10 +593,9 @@ function _batch_process()
 	// Indicate that this batch set needs to be initialized.
 	$set_changed = true;
 
-	// If this batch was marked for progressive execution (e.g. forms submitted by
-	// drupal_form_submit()), initialize a timer to determine whether we need to
-	// proceed with the same batch phase when a processing time of 1 second has
-	// been exceeded.
+	// If this batch was marked for progressive execution, initialize a timer to
+	// determine whether we need to proceed with the same batch phase when a
+	// processing time of 1 second has been exceeded.
 	if($batch['progressive'])
 	{
 		batch_timer_start('batch_processing');
@@ -978,7 +894,6 @@ function _batch_finished()
  * Shutdown function: Stores the current batch data for the next request.
  *
  * @see _batch_page()
- * @see drupal_register_shutdown_function()
  */
 function _batch_shutdown()
 {
