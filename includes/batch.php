@@ -58,12 +58,12 @@ e107_require_once(e_PLUGIN . 'batch/includes/batch.queue.php');
  *     consisting of the name of an implementation of callback_batch_operation() and an array
  *     of parameter.
  *     Example:
- *     @code
+ * @code
  *     array(
  *       array('callback_batch_operation_1', array($arg1)),
  *       array('callback_batch_operation_2', array($arg2_1, $arg2_2)),
  *     )
- *     @endcode
+ * @endcode
  *   - title: A safe, translated string to use as the title for the progress page. Defaults to
  *     'Processing'.
  *   - init_message: Message displayed while the processing is initialized. Defaults to
@@ -607,7 +607,7 @@ function _batch_process()
 	{
 		$current_set['start'] = microtime(true);
 	}
-	
+
 	$queue = _batch_queue($current_set);
 
 	while(!$current_set['success'])
@@ -843,9 +843,14 @@ function _batch_finished()
 			$tp = e107::getParser();
 
 			// Check if the set requires an additional file for function definitions.
-			if(isset($batch_set['file']) && is_file($batch_set['file']))
+			if(isset($batch_set['file']))
 			{
-				e107_include_once($tp->replaceConstants($batch_set['file']));
+				$file = $tp->replaceConstants($batch_set['file']);
+
+				if(is_file($file))
+				{
+					e107_include_once($file);
+				}
 			}
 
 			if(is_callable($batch_set['finished']))

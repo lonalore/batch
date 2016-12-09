@@ -131,11 +131,12 @@ function batch_example_process($comments, &$context)
 			$comment = $comments[$context['sandbox']['progress']];
 
 			// Do something with comment.
-			sleep(2);
+			sleep(1);
 
 			// Update our progress information.
 			$context['sandbox']['progress']++;
 			$context['message'] = 'Now processing: Comment #' . $comment['comment_id'];
+			$context['results'][] = $comment['comment_id'];
 		}
 	}
 
@@ -158,7 +159,7 @@ function batch_example_finished($success, $results, $operations)
 	if($success)
 	{
 		// Here we do something meaningful with the results.
-		$message = $tp->lanVars('[x] items successfully processed:', array(
+		$message = $tp->lanVars('[x] items successfully processed.', array(
 			'x' => count($results),
 		));
 		$ms->add($message, E_MESSAGE_SUCCESS, true);
