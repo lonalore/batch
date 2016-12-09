@@ -4,10 +4,6 @@
  * @file
  * Batch processing API for processes to run in multiple HTTP requests.
  *
- * Functions allowing actions processing to be spread out over several page requests,
- * thus ensuring that the processing does not get interrupted because of a PHP timeout,
- * while allowing the user to receive feedback on the progress of the ongoing operations.
- *
  * Example:
  * @code
  * $batch = array(
@@ -20,16 +16,16 @@
  *   'file' => '{e_PLUGIN}plugin/path/file.php',
  * );
  *
- * e107::getBatch('set', $batch);
+ * batch_set($batch);
  * // Setting redirect in batch_process.
- * e107::getBatch('process', e_BASE);
+ * batch_process(e_HTTP);
  * @endcode
  *
  * Note: if the batch 'title', 'init_message', 'progress_message', or 'error_message'
  * could contain any user input, it is the responsibility of the code calling
- * e107::getBatch('set', $batch) to sanitize them first with a function like
- * e107::getParser()->filter(). Furthermore, if the batch operation returns any user input
- * in the 'results' or 'message' keys of $context, it must also sanitize them first.
+ * batch_set($batch); to sanitize them first with a function like e107::getParser()->filter().
+ * Furthermore, if the batch operation returns any user input in the 'results' or 'message'
+ * keys of $context, it must also sanitize them first.
  */
 
 if(!defined('e107_INIT'))
@@ -56,18 +52,18 @@ e107_require_once(e_PLUGIN . 'batch/includes/batch.queue.php');
  * afresh for each new set.
  *
  * @param $batch_definition
- *   An associative array defining the batch, with the following elements (all
- *   are optional except as noted):
+ *   An associative array defining the batch, with the following elements (all are optional
+ *   except as noted):
  *   - operations: (required) Array of operations to be performed, where each item is an array
  *     consisting of the name of an implementation of callback_batch_operation() and an array
  *     of parameter.
  *     Example:
- * @code
+ *     @code
  *     array(
  *       array('callback_batch_operation_1', array($arg1)),
  *       array('callback_batch_operation_2', array($arg2_1, $arg2_2)),
  *     )
- * @endcode
+ *     @endcode
  *   - title: A safe, translated string to use as the title for the progress page. Defaults to
  *     'Processing'.
  *   - init_message: Message displayed while the processing is initialized. Defaults to
@@ -81,7 +77,7 @@ e107_require_once(e_PLUGIN . 'batch/includes/batch.queue.php');
  *     the batch has completed. This should be used to perform any result massaging that may be
  *     needed, and possibly save data in $_SESSION for display after final page redirection.
  *   - file: Path to the file containing the definitions of the 'operations' and 'finished'
- *     functions.
+ *     functions. For example: {e_PLUGIN}plugin/file.php
  *   - css: Array of paths to CSS files to be used on the progress page.
  *   - url_options: options used for constructing redirect URLs for the batch.
  */
@@ -181,6 +177,8 @@ function batch_next_id($existing_id = 0)
 		$db->gen('INSERT INTO #sequences () VALUES ()');
 		$new_id = $db->lastInsertId();
 	}
+
+	$db->gen('DELETE FROM #sequences WHERE value < ' . $new_id);
 
 	return $new_id;
 }
@@ -464,7 +462,7 @@ function _batch_page()
 function _batch_start()
 {
 	// TODO support no-JS?
-	return _batch_progress_page_js();
+	return _batch_progress_page();
 }
 
 /**
@@ -472,13 +470,13 @@ function _batch_start()
  *
  * This initializes the batch and error messages. Note that in JavaScript-based
  * processing, the batch processing page is displayed only once and updated via
- * AHAH requests, so only the first batch set gets to define the page title.
+ * Ajax requests, so only the first batch set gets to define the page title.
  * Titles specified by subsequent batch sets are not displayed.
  *
  * @see batch_set()
  * @see _batch_do()
  */
-function _batch_progress_page_js()
+function _batch_progress_page()
 {
 	$batch = batch_get();
 
@@ -511,7 +509,7 @@ function _batch_progress_page_js()
 /**
  * Does one execution pass with JavaScript and returns progress to the browser.
  *
- * @see _batch_progress_page_js()
+ * @see _batch_progress_page()
  * @see _batch_process()
  */
 function _batch_do()
