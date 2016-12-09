@@ -4,7 +4,7 @@
 
 Batch processing API for processes to run in multiple HTTP requests.
 
-Example:
+**Example**:
 ```php
 $batch = array(
   'title' => t('Exporting'),
@@ -26,3 +26,9 @@ batch_process(e_HTTP);
 Batch API operations are added as new batch sets. Batch sets are used to spread processing over several page requests. This helps to ensure that the processing is not interrupted due to PHP timeouts, while users are still able to receive feedback on the progress of the ongoing operations. Combining related operations into distinct batch sets provides clean code independence for each batch set, ensuring that two or more batches, submitted independently, can be processed without mutual interference. Each batch set may specify its own set of operations and results, produce its own UI messages, and trigger its own 'finished' callback. Batch sets are processed sequentially, with the progress bar starting afresh for each new set.
 
 For more details please see `example.php` file.
+
+### Screenshots
+
+![In action](https://dl.dropboxusercontent.com/u/17751753/batch/01.png)
+
+![Finished](https://dl.dropboxusercontent.com/u/17751753/batch/02.png)
