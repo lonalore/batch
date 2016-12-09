@@ -110,7 +110,7 @@ class BatchQueue
 			'data'  => array(
 				'queue_expire' => 0,
 			),
-			'WHERE' => 'queue_id = ' . (int) $item->item_id,
+			'WHERE' => 'queue_id = ' . (int) $item['item_id'],
 		);
 
 		return (bool) $db->update('queue', $update, false);
@@ -124,7 +124,7 @@ class BatchQueue
 	public function deleteItem($item)
 	{
 		$db = e107::getDb('BatchQueueDeleteItem');
-		$db->delete('queue', 'queue_id = ' . (int) $item->item_id);
+		$db->delete('queue', 'queue_id = ' . (int) $item['item_id']);
 	}
 
 	/**
