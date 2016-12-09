@@ -95,8 +95,7 @@ function batch_set($batch_definition)
 		if(empty($batch))
 		{
 			$batch = array(
-				'sets'             => array(),
-				'has_form_submits' => false,
+				'sets' => array(),
 			);
 		}
 
@@ -326,6 +325,7 @@ function _batch_populate_queue(&$batch, $set_id)
 
 		$queue = _batch_queue($batch_set);
 		$queue->createQueue();
+
 		foreach($batch_set['operations'] as $operation)
 		{
 			$queue->createItem($operation);
@@ -417,7 +417,7 @@ function _batch_page()
 
 		if(!$batch)
 		{
-			e107::getMessage()->addError('No active batch.');
+			e107::getMessage()->add('No active batch.', E_MESSAGE_ERROR, true);
 			e107::redirect();
 		}
 	}
@@ -463,6 +463,7 @@ function _batch_page()
  */
 function _batch_start()
 {
+	// TODO support no-JS?
 	return _batch_progress_page_js();
 }
 
@@ -482,7 +483,7 @@ function _batch_progress_page_js()
 	$batch = batch_get();
 
 	$current_set = _batch_current_set();
-	// $caption = $current_set['title']; TODO
+	$caption = $current_set['title'];
 
 	// Merge required query parameters for batch processing into those provided by
 	// batch_set() or hook_batch_alter().
@@ -501,7 +502,10 @@ function _batch_progress_page_js()
 	e107::js('settings', $js_setting);
 	e107::js('batch', 'js/batch.js');
 
-	return '<div id="progress"></div>';
+	return array(
+		'caption' => $caption,
+		'content' => '<div id="progress"></div>',
+	);
 }
 
 /**
@@ -516,7 +520,7 @@ function _batch_do()
 	if($_SERVER['REQUEST_METHOD'] != 'POST')
 	{
 		// TODO
-		e107::getMessage()->addError('HTTP POST is required.');
+		e107::getMessage()->add('HTTP POST is required.', E_MESSAGE_ERROR, true);
 		$caption = 'Error';
 		return '';
 	}
@@ -605,7 +609,7 @@ function _batch_process()
 	{
 		$current_set['start'] = microtime(true);
 	}
-
+	
 	$queue = _batch_queue($current_set);
 
 	while(!$current_set['success'])
@@ -613,10 +617,15 @@ function _batch_process()
 		// If this is the first time we iterate this batch set in the current
 		// request, we check if it requires an additional file for functions
 		// definitions.
-		if($set_changed && isset($current_set['file']) && is_file($current_set['file']))
+		if($set_changed && isset($current_set['file']))
 		{
 			$tp = e107::getParser();
-			e107_include_once($tp->replaceConstants($current_set['file']));
+			$file = $tp->replaceConstants($current_set['file']);
+
+			if(is_file($file))
+			{
+				e107_include_once($file);
+			}
 		}
 
 		$task_message = '';
@@ -624,9 +633,11 @@ function _batch_process()
 		// default.
 		$finished = 1;
 
-		if($item = $queue->claimItem())
+		$item = $queue->claimItem();
+
+		if($item)
 		{
-			list($function, $args) = $item->data;
+			list($function, $args) = $item['queue_data'];
 
 			// Build the 'context' array and execute the function call.
 			$batch_context = array(
@@ -635,6 +646,7 @@ function _batch_process()
 				'finished' => &$finished,
 				'message'  => &$task_message,
 			);
+
 			call_user_func_array($function, array_merge($args, array(&$batch_context)));
 
 			if($finished >= 1)
@@ -652,8 +664,7 @@ function _batch_process()
 		// through the remaining sets, marking them 'successfully processed'
 		// along the way, until we find a set that contains operations.
 		// _batch_next_set() executes form submit handlers stored in 'control'
-		// sets (see form_execute_handlers()), which can in turn add new sets to
-		// the batch.
+		// sets, which can in turn add new sets to the batch.
 		$set_changed = false;
 		$old_set = $current_set;
 		while(empty($current_set['count']) && ($current_set['success'] = true) && _batch_next_set())
@@ -728,8 +739,7 @@ function _batch_process()
 	else
 	{
 		// If we are not in progressive mode, the entire batch has been processed.
-		_batch_finished();
-		return array();
+		return _batch_finished();
 	}
 }
 
@@ -832,12 +842,14 @@ function _batch_finished()
 	{
 		if(isset($batch_set['finished']))
 		{
+			$tp = e107::getParser();
+
 			// Check if the set requires an additional file for function definitions.
 			if(isset($batch_set['file']) && is_file($batch_set['file']))
 			{
-				$tp = e107::getParser();
 				e107_include_once($tp->replaceConstants($batch_set['file']));
 			}
+
 			if(is_callable($batch_set['finished']))
 			{
 				$queue = _batch_queue($batch_set);
@@ -883,7 +895,9 @@ function _batch_finished()
 			$_GET['destination'] = $_batch['destination'];
 		}
 
-		e107::redirect($_batch['source_url'] . '?' . http_build_query(array(
+		$url = !empty($_batch['redirect']) ? $_batch['redirect'] : $_batch['source_url'];
+
+		e107::redirect($url . '?' . http_build_query(array(
 				'op' => 'finish',
 				'id' => $_batch['id'],
 			)));

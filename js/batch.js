@@ -9,9 +9,9 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	e107.behaviors.batch = {
 		attach: function (context, settings)
 		{
-			$('#progress', context).once('batch', function ()
+			$('#progress', context).once('batch').each(function ()
 			{
-				var holder = $(this);
+				var $holder = $(this);
 
 				// Success: redirect to the summary.
 				var updateCallback = function (progress, status, pb)
@@ -25,13 +25,14 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 				var errorCallback = function (pb)
 				{
-					holder.prepend($('<p class="error"></p>').html(settings.batch.errorMessage));
+					$holder.prepend($('<p class="error"></p>').html(settings.batch.errorMessage));
 					$('#wait').hide();
 				};
 
 				var progress = new e107.progressBar('updateprogress', updateCallback, 'POST', errorCallback);
+
 				progress.setProgress(-1, settings.batch.initMessage);
-				holder.append(progress.element);
+				$holder.append(progress.element);
 				progress.startMonitoring(settings.batch.uri + '&op=do', 10);
 			});
 		}
@@ -62,9 +63,12 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 
 		// The WAI-ARIA setting aria-live="polite" will announce changes after users
 		// have completed their current activity and not interrupt the screen reader.
-		this.element = $('<div class="progress" aria-live="polite"></div>').attr('id', id);
-		this.element.html('<div class="bar"><div class="filled"></div></div>' +
-			'<div class="percentage"></div>' +
+		this.element = $('<div class="progress-wrapper" aria-live="polite"></div>');
+		this.element.html('<div id ="' + id + '" class="progress progress-striped active">' +
+			'<div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">' +
+			'<div class="percentage sr-only"></div>' +
+			'</div></div>' +
+			'</div><div class="percentage pull-right"></div>' +
 			'<div class="message">&nbsp;</div>');
 	};
 
@@ -75,10 +79,13 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	{
 		if(percentage >= 0 && percentage <= 100)
 		{
-			$('div.filled', this.element).css('width', percentage + '%');
+			$('div.progress-bar', this.element).css('width', percentage + '%');
+			$('div.progress-bar', this.element).attr('aria-valuenow', percentage);
 			$('div.percentage', this.element).html(percentage + '%');
 		}
+
 		$('div.message', this.element).html(message);
+
 		if(this.updateCallback)
 		{
 			this.updateCallback(percentage, message, this);
@@ -114,6 +121,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 		{
 			clearTimeout(this.timer);
 		}
+
 		if(this.uri)
 		{
 			var pb = this;
@@ -153,7 +161,7 @@ var e107 = e107 || {'settings': {}, 'behaviors': {}};
 	 */
 	e107.progressBar.prototype.displayError = function (string)
 	{
-		var error = $('<div class="messages error"></div>').html(string);
+		var error = $('<div class="alert alert-block alert-error"><a class="close" data-dismiss="alert" href="#">&times;</a><h4>Error message</h4></div>').append(string);
 		$(this.element).before(error).hide();
 
 		if(this.errorCallback)

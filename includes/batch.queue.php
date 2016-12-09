@@ -162,12 +162,17 @@ class BatchQueue
 	{
 		$tp = e107::getParser();
 		$db = e107::getDb('BatchQueueClaimItem');
-		$item = $db->retrieve('queue', 'queue_id, queue_data', 'queue_name = "' . $tp->toDB($this->name) . '" ORDER BY queue_id ASC LIMIT 1');
+		$db->select('queue', 'queue_id, queue_data', 'queue_name = "' . $tp->toDB($this->name) . '" ORDER BY queue_id ASC LIMIT 1');
 
-		if(isset($item['data']))
+		$item = array();
+		while($row = $db->fetch())
 		{
-			$item['data'] = unserialize(base64_decode($item['data']));
+			$item = $row;
+		}
 
+		if(isset($item['queue_data']))
+		{
+			$item['queue_data'] = unserialize(base64_decode($item['queue_data']));
 			return $item;
 		}
 

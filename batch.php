@@ -23,7 +23,9 @@ if($output === false)
 {
 	// Access denied page.
 }
-elseif(isset($output))
+elseif(isset($output['content']))
 {
-	echo $output;
+	require_once(HEADERF);
+	e107::getRender()->tablerender($output['caption'], $output['content']);
+	require_once(FOOTERF);
 }
