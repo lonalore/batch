@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Batch API" lan="LAN_PLUGIN_BATCH_NAME" version="1.0" date="2016-12-09" compatibility="2.0" installRequired="true">
+	<author name="Lóna Lore" url="https://github.com/lonalore/batch"/>
+	<summary lan="LAN_PLUGIN_BATCH_SUMM">Batch processing API for processes to run in multiple HTTP requests.</summary>
+	<description lan="LAN_PLUGIN_BATCH_DESC">Batch processing API for processes to run in multiple HTTP requests.</description>
+	<keywords>
+		<word>batch</word>
+		<word>api</word>
+	</keywords>
+	<category>tools</category>
+	<copyright>GNU General Public License</copyright>
+</e107Plugin>
