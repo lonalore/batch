@@ -9,7 +9,7 @@
  * $batch = array(
  *   'title' => t('Exporting'),
  *   'operations' => array(
- *     array('my_function_1', array($account->uid, 'story')),
+ *     array('my_function_1', array($author, 'story')),
  *     array('my_function_2', array()),
  *   ),
  *   'finished' => 'my_finished_callback',
