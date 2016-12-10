@@ -7,13 +7,13 @@ Batch processing API for processes to run in multiple HTTP requests.
 **Example**:
 ```php
 $batch = array(
-  'title' => t('Exporting'),
-   'operations' => array(
-    array('my_function_1', array($author, 'story')),
-    array('my_function_2', array()),
-  ),
-  'finished' => 'my_finished_callback',
-  'file' => '{e_PLUGIN}plugin/path/file.php',
+	'title' => t('Exporting'),
+	'operations' => array(
+		array('my_function_1', array($author, 'story')),
+		array('my_function_2', array()),
+	),
+	'finished' => 'my_finished_callback',
+	'file' => '{e_PLUGIN}plugin/path/file.php',
 );
 
 batch_set($batch);
