@@ -22,7 +22,9 @@ $output = _batch_page();
 if($output === false)
 {
 	// Access denied page.
-	e107::redirect('error.php?403');
+	require_once(HEADERF);
+	e107::setErrorPage(403);
+	require_once(FOOTERF);
 }
 elseif(isset($output['content']))
 {
