@@ -23,7 +23,7 @@ if($output === false)
 {
 	// Access denied page.
 	require_once(HEADERF);
-	e107::setErrorPage(403);
+	e107::getError()->render(403);
 	require_once(FOOTERF);
 }
 elseif(isset($output['content']))
