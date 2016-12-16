@@ -23,7 +23,11 @@ if($output === false)
 {
 	// Access denied page.
 	require_once(HEADERF);
-	e107::getError()->render(403);
+	$error = e107::getError();
+	$error->set(403);
+	$error->setCaption('Access denied');
+	$error->setContent('You are not allowed to access this page.');
+	$error->render();
 	require_once(FOOTERF);
 }
 elseif(isset($output['content']))
