@@ -32,3 +32,8 @@ For more details please see `example.php` file.
 ![In action](https://dl.dropboxusercontent.com/u/17751753/batch/01.png)
 
 ![Finished](https://dl.dropboxusercontent.com/u/17751753/batch/02.png)
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/lonalore/batch/badge.svg?style=beer-square)](https://beerpay.io/lonalore/batch)  [![Beerpay](https://beerpay.io/lonalore/batch/make-wish.svg?style=flat-square)](https://beerpay.io/lonalore/batch?focus=wish)
