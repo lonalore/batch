@@ -29,9 +29,9 @@ For more details please see `example.php` file.
 
 ### Screenshots
 
-![In action](https://dl.dropboxusercontent.com/u/17751753/batch/01.png)
+![In action](https://www.dropbox.com/s/msya3noqmvl8f3y/01.png?dl=1)
 
-![Finished](https://dl.dropboxusercontent.com/u/17751753/batch/02.png)
+![Finished](https://www.dropbox.com/s/wtbbua9nuerrvxt/02.png?dl=1)
 
 ## Support on Beerpay
 Hey dude! Help me out for a couple of :beers:!
