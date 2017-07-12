@@ -1,4 +1,5 @@
-# Batch API
+Batch API
+=========
 
 > e107 (v2) plugin - API for Batch operations.
 
