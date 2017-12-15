@@ -230,12 +230,30 @@ function batch_process($redirect = null, $url = 'batch')
 		{
 			// Now that we have a batch id, we can generate the redirection link in
 			// the generic error message.
-			$url = e107::url('batch', 'batch', array(), array(
-				'query' => array(
-					'op' => 'finished',
-					'id' => $batch['id'],
-				),
-			));
+			if($process_info['url'] == 'batch')
+			{
+				$url = e107::url('batch', 'batch', array(), array(
+					'query' => array(
+						'op' => 'finished',
+						'id' => $batch['id'],
+					),
+				));
+			}
+			else
+			{
+				$url = explode('?', $process_info['url']);
+
+				$query = array();
+				if (!empty($url[1])) {
+					parse_str($url[1], $query);
+				}
+
+				$query['op'] = 'finished';
+				$query['id'] = $batch['id'];
+
+				$url[1] = http_build_query($query);
+				$url = implode('?', $url);
+			}
 
 			$batch['error_message'] = e107::getParser()->lanVars(LAN_PLUGIN_BATCH_01, array(
 				'x' => '<a href="' . $url . '">' . LAN_PLUGIN_BATCH_02 . '</a>',
@@ -267,12 +285,30 @@ function batch_process($redirect = null, $url = 'batch')
 			$_SESSION['batches'][$batch['id']] = true;
 
 			// Redirect for processing.
-			$url = e107::url('batch', 'batch', array(), array(
-				'query' => array(
-					'op' => 'start',
-					'id' => $batch['id'],
-				),
-			));
+			if($process_info['url'] == 'batch')
+			{
+				$url = e107::url('batch', 'batch', array(), array(
+					'query' => array(
+						'op' => 'start',
+						'id' => $batch['id'],
+					),
+				));
+			}
+			else
+			{
+				$url = explode('?', $process_info['url']);
+
+				$query = array();
+				if (!empty($url[1])) {
+					parse_str($url[1], $query);
+				}
+
+				$query['op'] = 'start';
+				$query['id'] = $batch['id'];
+
+				$url[1] = http_build_query($query);
+				$url = implode('?', $url);
+			}
 
 			e107::redirect($url);
 		}
