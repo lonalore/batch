@@ -192,7 +192,7 @@ class BatchQueue
 
 		while($item = $db->fetch())
 		{
-			$result[] = unserialize(base64_decode($item['data']));
+			$result[] = unserialize(base64_decode($item['queue_data']));
 		}
 
 		return $result;
